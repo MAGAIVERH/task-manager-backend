@@ -1,3 +1,4 @@
+const { NotFoundError } = require("../errors/mongodb.errors");
 const TaskModel = require("../models/task.model");
 
 class TaskController {
@@ -22,10 +23,9 @@ class TaskController {
             const task = await TaskModel.findById(taskId);
 
             if (!task) {
-                return this.res
-                    .status(404)
-                    .send("Essa tarefa não foi encontrada");
+                return NotFoundError(this.res);
             }
+
             return this.res.status(200).send(task);
         } catch (error) {
             this.res.status(500).send(error.message);
@@ -50,6 +50,10 @@ class TaskController {
             const taskData = this.req.body;
 
             const taskToUpdate = await TaskModel.findById(taskId);
+
+            if (!taskToUpdate) {
+                return NotFoundError(this.res);
+            }
 
             const allowedUpdates = ["isCompleted"];
             const requestedUpdates = Object.keys(taskData);
@@ -77,9 +81,7 @@ class TaskController {
             const taskToDelete = await TaskModel.findById(taskId);
 
             if (!taskToDelete) {
-                return this.res
-                    .status(404)
-                    .send("Essa mensagem não foi encontrada.");
+                return NotFoundError(this.res);
             }
 
             const deleteTask = await TaskModel.findByIdAndDelete(taskId);
